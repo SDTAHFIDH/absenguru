@@ -1,1 +1,1086 @@
-# absenguru
+<absenguru html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD TAHFIDH AL-QUR'AN - Sistem Absensi Guru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md fade-in">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white text-2xl">📚</span>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">SD TAHFIDH AL-QUR'AN</h1>
+                <h2 class="text-lg font-semibold text-blue-600 mt-1">Sistem Absensi Guru</h2>
+                <p class="text-gray-600 mt-2">Silakan login untuk melanjutkan</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium btn-hover hover:bg-blue-700">
+                    Masuk
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden">
+                Username atau password salah!
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="hidden min-h-screen">
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl">📚</span>
+                        <div class="ml-3">
+                            <h1 class="text-lg font-bold text-gray-800">SD TAHFIDH AL-QUR'AN</h1>
+                            <p class="text-sm text-gray-600">Dashboard Guru</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="teacherName" class="text-gray-700 font-medium"></span>
+                        <button onclick="logout()" class="text-red-600 hover:text-red-800 font-medium">Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-4xl mx-auto p-6">
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <!-- Clock In Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <span class="text-green-600 text-xl">🕐</span>
+                        </div>
+                        <h2 class="ml-4 text-xl font-semibold text-gray-800">Absen Masuk</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Catat waktu kedatangan Anda</p>
+                    <button id="clockInBtn" onclick="clockIn()" 
+                            class="w-full bg-green-600 text-white py-3 rounded-lg font-medium btn-hover hover:bg-green-700">
+                        Absen Masuk
+                    </button>
+                    <div id="clockInTime" class="mt-3 text-sm text-green-600 font-medium hidden"></div>
+                </div>
+
+                <!-- Clock Out Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <span class="text-red-600 text-xl">🕕</span>
+                        </div>
+                        <h2 class="ml-4 text-xl font-semibold text-gray-800">Absen Pulang</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Catat waktu kepulangan Anda</p>
+                    <button id="clockOutBtn" onclick="clockOut()" disabled
+                            class="w-full bg-gray-400 text-white py-3 rounded-lg font-medium cursor-not-allowed">
+                        Absen Pulang
+                    </button>
+                    <div id="clockOutTime" class="mt-3 text-sm text-red-600 font-medium hidden"></div>
+                </div>
+            </div>
+
+            <!-- Today's Status -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Status Hari Ini</h3>
+                <div id="todayStatus" class="text-gray-600">
+                    Belum absen masuk
+                </div>
+            </div>
+
+            <!-- Personal Attendance History -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Riwayat Absensi Saya</h3>
+                    <div class="flex space-x-2">
+                        <select id="teacherMonthFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                        <select id="teacherYearFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                        <button onclick="loadMyAttendance()" 
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium btn-hover hover:bg-blue-700">
+                            Lihat
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Masuk</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Pulang</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durasi Kerja</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myAttendanceTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                                    Pilih bulan dan tahun, lalu klik "Lihat" untuk melihat riwayat absensi Anda
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden min-h-screen">
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl">👨‍💼</span>
+                        <div class="ml-3">
+                            <h1 class="text-lg font-bold text-gray-800">SD TAHFIDH AL-QUR'AN</h1>
+                            <p class="text-sm text-gray-600">Dashboard Admin</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-800 font-medium">Keluar</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto p-6">
+            <!-- Filter Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Filter Rekap Absensi</h3>
+                <div class="grid md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Guru</label>
+                        <select id="teacherFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Semua Guru</option>
+                            <option value="G001">Selvy Herawati</option>
+                            <option value="G002">Kharisma</option>
+                            <option value="G003">Caroylina Marzuqah</option>
+                            <option value="G004">Azhari Prasetyo Yuli</option>
+                            <option value="G005">Desi Nur Septiani</option>
+                            <option value="G006">Chilyatul Auliya</option>
+                            <option value="G007">Fahdianti Anggraeni</option>
+                            <option value="G008">Fajarista Faiq R</option>
+                            <option value="G009">Tri Wahyuningtias</option>
+                            <option value="G010">Muhammad Yusuf</option>
+                            <option value="G011">Emi Maryamah</option>
+                            <option value="G012">Nurul Miftakul Janah</option>
+                            <option value="G013">Daiyatun Nadhiroh</option>
+                            <option value="G014">Zulianah</option>
+                            <option value="G015">Nafiah Indahniyyah</option>
+                            <option value="G016">Lilik Vauziyah</option>
+                            <option value="G017">Abdul Ghoni</option>
+                            <option value="G018">Jossa Andika Dwi P</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
+                        <select id="monthFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="01">Januari</option>
+                            <option value="02">Februari</option>
+                            <option value="03">Maret</option>
+                            <option value="04">April</option>
+                            <option value="05">Mei</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">Agustus</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
+                        <select id="yearFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end space-x-2">
+                        <button onclick="filterAttendance()" 
+                                class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium btn-hover hover:bg-blue-700">
+                            Filter Data
+                        </button>
+                        <button onclick="showTestData()" 
+                                class="px-4 bg-gray-600 text-white py-2 rounded-lg font-medium btn-hover hover:bg-gray-700">
+                            Test Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Table -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">Rekap Absensi</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Masuk</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Pulang</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    Pilih filter dan klik "Filter Data" untuk melihat rekap absensi<br>
+                                    <small>Atau klik "Test Data" untuk melihat contoh data</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Teacher data
+        const teachers = {
+            'selvy': { id: 'G001', name: 'Selvy Herawati', password: 'herawati' },
+            'risma': { id: 'G002', name: 'Kharisma', password: 'risma' },
+            'alin': { id: 'G003', name: 'Caroylina Marzuqah', password: 'alin' },
+            'azhari': { id: 'G004', name: 'Azhari Prasetyo Yuli', password: 'azhari' },
+            'septi': { id: 'G005', name: 'Desi Nur Septiani', password: 'septi' },
+            'chilya': { id: 'G006', name: 'Chilyatul Auliya', password: 'chilya' },
+            'dian': { id: 'G007', name: 'Fahdianti Anggraeni', password: 'dian' },
+            'rista': { id: 'G008', name: 'Fajarista Faiq R', password: 'rista' },
+            'tias': { id: 'G009', name: 'Tri Wahyuningtias', password: 'tias' },
+            'yusuf': { id: 'G010', name: 'Muhammad Yusuf', password: 'yusuf' },
+            'emi': { id: 'G011', name: 'Emi Maryamah', password: 'emi' },
+            'nurul': { id: 'G012', name: 'Nurul Miftakul Janah', password: 'nurul' },
+            'nad': { id: 'G013', name: 'Daiyatun Nadhiroh', password: 'nad' },
+            'zul': { id: 'G014', name: 'Zulianah', password: 'zul' },
+            'indah': { id: 'G015', name: 'Nafiah Indahniyyah', password: 'indah' },
+            'lilik': { id: 'G016', name: 'Lilik Vauziyah', password: 'lilik' },
+            'abdul': { id: 'G017', name: 'Abdul Ghoni', password: 'abdul' },
+            'jossa': { id: 'G018', name: 'Jossa Andika Dwi P', password: 'jossa' }
+        };
+
+        // Admin credentials
+        const admin = { username: 'admin', password: 'admin123' };
+
+        let currentUser = null;
+
+        // Google Apps Script and Sheet URLs
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXuhM2BjYH0pwzBh7psnT5admuPCF3QtsLFT7Bd3PRed5sVtAqPQfvNKCs2IyDMXMD/exec';
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJ3DpJLgLAaEbwmWnDdUxjPi8zQbDvRDGiz1riqNRVnwE96cpcZ0NJ5Wa9gz-p1fWqCCD5PjbbvQI-/pub?output=csv';
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Check admin login
+            if (username === admin.username && password === admin.password) {
+                currentUser = { type: 'admin', username: 'admin', name: 'Administrator' };
+                showAdminDashboard();
+                return;
+            }
+            
+            // Check teacher login
+            if (teachers[username] && teachers[username].password === password) {
+                currentUser = { 
+                    type: 'teacher', 
+                    username: username, 
+                    id: teachers[username].id,
+                    name: teachers[username].name 
+                };
+                showTeacherDashboard();
+                return;
+            }
+            
+            // Show error
+            document.getElementById('loginError').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loginError').classList.add('hidden');
+            }, 3000);
+        });
+
+        function showTeacherDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('teacherDashboard').classList.remove('hidden');
+            document.getElementById('teacherName').textContent = currentUser.name;
+            
+            // Set current month and year for teacher filters
+            const now = new Date();
+            document.getElementById('teacherMonthFilter').value = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('teacherYearFilter').value = now.getFullYear();
+            
+            // Check today's attendance status
+            checkTodayAttendance();
+            
+            // Load current month attendance automatically
+            loadMyAttendance();
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            
+            // Set current month and year
+            const now = new Date();
+            document.getElementById('monthFilter').value = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('yearFilter').value = now.getFullYear();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('teacherDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        async function clockIn() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID');
+            const dateString = now.toLocaleDateString('id-ID');
+            
+            // Show loading state
+            const clockInBtn = document.getElementById('clockInBtn');
+            const originalText = clockInBtn.textContent;
+            clockInBtn.textContent = 'Memproses...';
+            clockInBtn.disabled = true;
+            
+            try {
+                console.log('=== CLOCK IN DEBUG ===');
+                console.log('Sending clock in data:', {
+                    action: 'clockIn',
+                    id: currentUser.id,
+                    name: currentUser.name,
+                    date: dateString,
+                    clockInTime: timeString
+                });
+                console.log('Script URL:', SCRIPT_URL);
+                
+                // Create form data for better compatibility
+                const formData = new FormData();
+                formData.append('action', 'clockIn');
+                formData.append('id', currentUser.id);
+                formData.append('name', currentUser.name);
+                formData.append('date', dateString);
+                formData.append('clockInTime', timeString);
+                
+                // Send to Google Sheets
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                // Update UI
+                clockInBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                clockInBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                clockInBtn.textContent = 'Sudah Absen Masuk';
+                
+                document.getElementById('clockInTime').textContent = `Absen masuk: ${timeString}`;
+                document.getElementById('clockInTime').classList.remove('hidden');
+                
+                const clockOutBtn = document.getElementById('clockOutBtn');
+                clockOutBtn.disabled = false;
+                clockOutBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                clockOutBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                
+                document.getElementById('todayStatus').textContent = `Sudah absen masuk pada ${timeString}`;
+                
+                alert('Absen masuk berhasil dicatat!');
+                
+            } catch (error) {
+                console.error('Clock in error:', error);
+                
+                // Reset button state
+                clockInBtn.textContent = originalText;
+                clockInBtn.disabled = false;
+                
+                alert('Gagal mencatat absen masuk. Silakan coba lagi.');
+            }
+        }
+
+        async function clockOut() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID');
+            const dateString = now.toLocaleDateString('id-ID');
+            
+            // Show loading state
+            const clockOutBtn = document.getElementById('clockOutBtn');
+            const originalText = clockOutBtn.textContent;
+            clockOutBtn.textContent = 'Memproses...';
+            clockOutBtn.disabled = true;
+            
+            try {
+                console.log('=== CLOCK OUT DEBUG ===');
+                console.log('Current user:', currentUser);
+                console.log('Sending clock out data:', {
+                    action: 'clockOut',
+                    id: currentUser.id,
+                    name: currentUser.name,
+                    date: dateString,
+                    clockOutTime: timeString
+                });
+                console.log('Script URL:', SCRIPT_URL);
+                
+                // Try multiple methods to ensure data is sent
+                
+                // Method 1: FormData
+                const formData = new FormData();
+                formData.append('action', 'clockOut');
+                formData.append('id', currentUser.id);
+                formData.append('name', currentUser.name);
+                formData.append('date', dateString);
+                formData.append('clockOutTime', timeString);
+                
+                console.log('Attempting FormData method...');
+                let response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('FormData response status:', response.status);
+                let responseText = await response.text();
+                console.log('FormData response text:', responseText);
+                
+                // Method 2: URL parameters (backup)
+                if (!response.ok) {
+                    console.log('FormData failed, trying URL parameters...');
+                    const params = new URLSearchParams({
+                        action: 'clockOut',
+                        id: currentUser.id,
+                        name: currentUser.name,
+                        date: dateString,
+                        clockOutTime: timeString
+                    });
+                    
+                    response = await fetch(`${SCRIPT_URL}?${params.toString()}`, {
+                        method: 'POST'
+                    });
+                    
+                    console.log('URL params response status:', response.status);
+                    responseText = await response.text();
+                    console.log('URL params response text:', responseText);
+                }
+                
+                // Method 3: JSON payload (backup)
+                if (!response.ok) {
+                    console.log('URL params failed, trying JSON...');
+                    response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'clockOut',
+                            id: currentUser.id,
+                            name: currentUser.name,
+                            date: dateString,
+                            clockOutTime: timeString
+                        })
+                    });
+                    
+                    console.log('JSON response status:', response.status);
+                    responseText = await response.text();
+                    console.log('JSON response text:', responseText);
+                }
+                
+                // Update UI regardless of response (optimistic update)
+                clockOutBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                clockOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                clockOutBtn.textContent = 'Sudah Absen Pulang';
+                
+                document.getElementById('clockOutTime').textContent = `Absen pulang: ${timeString}`;
+                document.getElementById('clockOutTime').classList.remove('hidden');
+                
+                const clockInTime = document.getElementById('clockInTime').textContent.split(': ')[1];
+                document.getElementById('todayStatus').textContent = `Absen lengkap - Masuk: ${clockInTime}, Pulang: ${timeString}`;
+                
+                // Show success message
+                if (response.ok || responseText.includes('success') || responseText.includes('berhasil')) {
+                    alert('Absen pulang berhasil dicatat!');
+                } else {
+                    alert('Absen pulang dicatat secara lokal. Data akan disinkronkan ke Google Sheets.');
+                    console.warn('Clock out may not have been recorded to Google Sheets:', responseText);
+                }
+                
+                // Refresh attendance data to show updated record
+                setTimeout(() => {
+                    loadMyAttendance();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Clock out error:', error);
+                
+                // Still update UI optimistically
+                clockOutBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                clockOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                clockOutBtn.textContent = 'Sudah Absen Pulang';
+                
+                document.getElementById('clockOutTime').textContent = `Absen pulang: ${timeString}`;
+                document.getElementById('clockOutTime').classList.remove('hidden');
+                
+                const clockInTime = document.getElementById('clockInTime').textContent.split(': ')[1];
+                document.getElementById('todayStatus').textContent = `Absen lengkap - Masuk: ${clockInTime}, Pulang: ${timeString}`;
+                
+                alert('Absen pulang dicatat secara lokal. Periksa koneksi internet untuk sinkronisasi ke Google Sheets.');
+            }
+        }
+
+        async function checkTodayAttendance() {
+            const today = new Date();
+            const todayString = today.toLocaleDateString('id-ID');
+            
+            try {
+                // Try to get today's attendance from Google Sheets
+                const url = `${SCRIPT_URL}?action=getAttendance&month=${String(today.getMonth() + 1).padStart(2, '0')}&year=${today.getFullYear()}&teacherId=${currentUser.id}`;
+                
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    const todayRecord = data.find(record => record.date === todayString);
+                    
+                    if (todayRecord) {
+                        if (todayRecord.clockOut && todayRecord.clockOut !== '-') {
+                            // Already clocked out
+                            document.getElementById('todayStatus').textContent = `Absen lengkap - Masuk: ${todayRecord.clockIn}, Pulang: ${todayRecord.clockOut}`;
+                            
+                            // Update UI to show completed state
+                            const clockInBtn = document.getElementById('clockInBtn');
+                            clockInBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                            clockInBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            clockInBtn.textContent = 'Sudah Absen Masuk';
+                            clockInBtn.disabled = true;
+                            
+                            const clockOutBtn = document.getElementById('clockOutBtn');
+                            clockOutBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                            clockOutBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                            clockOutBtn.textContent = 'Sudah Absen Pulang';
+                            clockOutBtn.disabled = true;
+                            
+                            document.getElementById('clockInTime').textContent = `Absen masuk: ${todayRecord.clockIn}`;
+                            document.getElementById('clockInTime').classList.remove('hidden');
+                            document.getElementById('clockOutTime').textContent = `Absen pulang: ${todayRecord.clockOut}`;
+                            document.getElementById('clockOutTime').classList.remove('hidden');
+                            
+                        } else if (todayRecord.clockIn && todayRecord.clockIn !== '-') {
+                            // Already clocked in, waiting for clock out
+                            document.getElementById('todayStatus').textContent = `Sudah absen masuk pada ${todayRecord.clockIn}`;
+                            
+                            const clockInBtn = document.getElementById('clockInBtn');
+                            clockInBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                            clockInBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            clockInBtn.textContent = 'Sudah Absen Masuk';
+                            clockInBtn.disabled = true;
+                            
+                            const clockOutBtn = document.getElementById('clockOutBtn');
+                            clockOutBtn.disabled = false;
+                            clockOutBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                            clockOutBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                            
+                            document.getElementById('clockInTime').textContent = `Absen masuk: ${todayRecord.clockIn}`;
+                            document.getElementById('clockInTime').classList.remove('hidden');
+                        }
+                    } else {
+                        document.getElementById('todayStatus').textContent = 'Belum absen masuk';
+                    }
+                }
+            } catch (error) {
+                console.log('Could not check today attendance:', error);
+                document.getElementById('todayStatus').textContent = 'Belum absen masuk';
+            }
+        }
+
+        async function loadMyAttendance() {
+            const month = document.getElementById('teacherMonthFilter').value;
+            const year = document.getElementById('teacherYearFilter').value;
+            
+            const tbody = document.getElementById('myAttendanceTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                        <div class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+                            Memuat riwayat absensi Anda...
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                console.log('=== LOADING PERSONAL ATTENDANCE ===');
+                console.log('Teacher ID:', currentUser.id);
+                console.log('Month:', month, 'Year:', year);
+                
+                // Try Apps Script API first
+                let url = `${SCRIPT_URL}?action=getAttendance&month=${month}&year=${year}&teacherId=${currentUser.id}`;
+                console.log('Personal attendance URL:', url);
+                
+                try {
+                    const apiResponse = await fetch(url);
+                    console.log('Personal API response status:', apiResponse.status);
+                    
+                    if (apiResponse.ok) {
+                        const apiData = await apiResponse.json();
+                        console.log('Personal API data:', apiData);
+                        
+                        if (apiData && Array.isArray(apiData)) {
+                            displayPersonalAttendance(apiData);
+                            return;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('Personal API method failed:', apiError);
+                }
+                
+                // Fallback to CSV method
+                console.log('Trying CSV method for personal attendance...');
+                const csvResponse = await fetch(SHEET_URL);
+                
+                if (!csvResponse.ok) {
+                    throw new Error(`CSV fetch failed with status: ${csvResponse.status}`);
+                }
+                
+                const csvText = await csvResponse.text();
+                const data = parseCSVData(csvText, currentUser.id, month, year);
+                console.log('Personal CSV data:', data);
+                
+                displayPersonalAttendance(data);
+                
+            } catch (error) {
+                console.error('Load personal attendance error:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-4 text-center text-red-500">
+                            Gagal memuat riwayat absensi. Silakan coba lagi.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function displayPersonalAttendance(data) {
+            const tbody = document.getElementById('myAttendanceTableBody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                            Tidak ada data absensi untuk bulan yang dipilih
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Sort data by date (newest first)
+            data.sort((a, b) => {
+                const dateA = new Date(a.date.split('/').reverse().join('-'));
+                const dateB = new Date(b.date.split('/').reverse().join('-'));
+                return dateB - dateA;
+            });
+            
+            tbody.innerHTML = data.map(row => {
+                const workDuration = calculateWorkDuration(row.clockIn, row.clockOut);
+                const statusColor = getPersonalStatusColor(row.status);
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${row.date}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${row.clockIn || '-'}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${row.clockOut || '-'}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColor}">
+                                ${row.status || 'Belum Lengkap'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${workDuration}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function calculateWorkDuration(clockIn, clockOut) {
+            if (!clockIn || !clockOut || clockIn === '-' || clockOut === '-') {
+                return '-';
+            }
+            
+            try {
+                const [inHour, inMin, inSec] = clockIn.split(':').map(Number);
+                const [outHour, outMin, outSec] = clockOut.split(':').map(Number);
+                
+                const inTime = new Date();
+                inTime.setHours(inHour, inMin, inSec || 0);
+                
+                const outTime = new Date();
+                outTime.setHours(outHour, outMin, outSec || 0);
+                
+                const diffMs = outTime - inTime;
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (diffHours < 0) return '-';
+                
+                return `${diffHours}j ${diffMins}m`;
+            } catch (error) {
+                return '-';
+            }
+        }
+
+        function getPersonalStatusColor(status) {
+            switch(status) {
+                case 'Lengkap':
+                    return 'bg-green-100 text-green-800';
+                case 'Masuk':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'Pulang':
+                    return 'bg-blue-100 text-blue-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function filterAttendance() {
+            const teacherId = document.getElementById('teacherFilter').value;
+            const month = document.getElementById('monthFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            
+            // Show loading state
+            const tbody = document.getElementById('attendanceTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        <div class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+                            Memuat data dari Google Sheets...
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                console.log('=== DEBUGGING FILTER ATTENDANCE ===');
+                console.log('Filter parameters:', { teacherId, month, year });
+                
+                // Try both methods: Apps Script API and CSV
+                console.log('Method 1: Trying Apps Script API...');
+                
+                let url = `${SCRIPT_URL}?action=getAttendance&month=${month}&year=${year}`;
+                if (teacherId) {
+                    url += `&teacherId=${teacherId}`;
+                }
+                
+                console.log('Apps Script URL:', url);
+                
+                try {
+                    const apiResponse = await fetch(url);
+                    console.log('Apps Script response status:', apiResponse.status);
+                    
+                    if (apiResponse.ok) {
+                        const apiData = await apiResponse.json();
+                        console.log('Apps Script data:', apiData);
+                        
+                        if (apiData && Array.isArray(apiData) && apiData.length > 0) {
+                            displayAttendanceData(apiData);
+                            return;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('Apps Script method failed:', apiError);
+                }
+                
+                console.log('Method 2: Trying CSV method...');
+                console.log('CSV URL:', SHEET_URL);
+                
+                // Fallback to CSV method
+                const csvResponse = await fetch(SHEET_URL);
+                console.log('CSV response status:', csvResponse.status);
+                
+                if (!csvResponse.ok) {
+                    throw new Error(`CSV fetch failed with status: ${csvResponse.status}`);
+                }
+                
+                const csvText = await csvResponse.text();
+                console.log('CSV text length:', csvText.length);
+                console.log('CSV first 300 chars:', csvText.substring(0, 300));
+                
+                // Parse CSV data
+                const data = parseCSVData(csvText, teacherId, month, year);
+                console.log('Parsed CSV data:', data);
+                
+                displayAttendanceData(data);
+                
+            } catch (error) {
+                console.error('Filter attendance error:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-red-500">
+                            <strong>Debug Info:</strong><br>
+                            Error: ${error.message}<br>
+                            Apps Script URL: ${SCRIPT_URL}<br>
+                            CSV URL: ${SHEET_URL}<br>
+                            <br>
+                            <strong>Troubleshooting:</strong><br>
+                            1. Pastikan Google Sheets sudah dipublikasi<br>
+                            2. Pastikan sheet bernama "Attendance"<br>
+                            3. Pastikan Apps Script sudah di-deploy<br>
+                            4. Cek console browser untuk detail error
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function parseCSVData(csvText, teacherId, month, year) {
+            const lines = csvText.trim().split('\n');
+            const data = [];
+            
+            // Skip header row (index 0)
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Parse CSV line (handle commas in quoted fields)
+                const columns = parseCSVLine(line);
+                
+                if (columns.length >= 5) {
+                    const [id, name, date, clockIn, clockOut, status] = columns;
+                    
+                    // Filter by teacher if specified
+                    if (teacherId && id !== teacherId) continue;
+                    
+                    // Filter by month and year
+                    if (date) {
+                        const dateParts = date.split('/');
+                        if (dateParts.length === 3) {
+                            const [day, dateMonth, dateYear] = dateParts;
+                            if (dateMonth !== month || dateYear !== year) continue;
+                        }
+                    }
+                    
+                    data.push({
+                        id: id || '',
+                        name: name || '',
+                        date: date || '',
+                        clockIn: clockIn || '-',
+                        clockOut: clockOut || '-',
+                        status: status || 'Belum Lengkap'
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+
+        function displayAttendanceData(data) {
+            const tbody = document.getElementById('attendanceTableBody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            Tidak ada data absensi untuk filter yang dipilih
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = data.map(row => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.clockIn}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.clockOut}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(row.status)}">
+                            ${row.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Lengkap':
+                    return 'bg-green-100 text-green-800';
+                case 'Masuk':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'Pulang':
+                    return 'bg-blue-100 text-blue-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showTestData() {
+            console.log('=== SHOWING TEST DATA ===');
+            
+            const month = document.getElementById('monthFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            const teacherId = document.getElementById('teacherFilter').value;
+            
+            // Generate test data
+            const testData = [];
+            const today = new Date();
+            const currentDay = today.getDate();
+            
+            // Create test data for current month
+            for (let day = 1; day <= Math.min(currentDay + 2, 31); day++) {
+                const date = `${day.toString().padStart(2, '0')}/${month}/${year}`;
+                
+                if (teacherId) {
+                    // Single teacher
+                    const teacherName = getTeacherName(teacherId);
+                    if (teacherName) {
+                        testData.push({
+                            id: teacherId,
+                            name: teacherName,
+                            date: date,
+                            clockIn: '07:30:00',
+                            clockOut: day <= currentDay ? '15:30:00' : '-',
+                            status: day <= currentDay ? 'Lengkap' : 'Masuk'
+                        });
+                    }
+                } else {
+                    // All teachers (first 5 for demo)
+                    const sampleTeachers = [
+                        { id: 'G001', name: 'Selvy Herawati' },
+                        { id: 'G002', name: 'Kharisma' },
+                        { id: 'G003', name: 'Caroylina Marzuqah' },
+                        { id: 'G004', name: 'Azhari Prasetyo Yuli' },
+                        { id: 'G005', name: 'Desi Nur Septiani' }
+                    ];
+                    
+                    sampleTeachers.forEach(teacher => {
+                        testData.push({
+                            id: teacher.id,
+                            name: teacher.name,
+                            date: date,
+                            clockIn: '07:30:00',
+                            clockOut: day <= currentDay ? '15:30:00' : '-',
+                            status: day <= currentDay ? 'Lengkap' : 'Masuk'
+                        });
+                    });
+                }
+            }
+            
+            console.log('Test data generated:', testData);
+            displayAttendanceData(testData);
+        }
+
+        function getTeacherName(teacherId) {
+            const teacherMap = {
+                'G001': 'Selvy Herawati',
+                'G002': 'Kharisma',
+                'G003': 'Caroylina Marzuqah',
+                'G004': 'Azhari Prasetyo Yuli',
+                'G005': 'Desi Nur Septiani',
+                'G006': 'Chilyatul Auliya',
+                'G007': 'Fahdianti Anggraeni',
+                'G008': 'Fajarista Faiq R',
+                'G009': 'Tri Wahyuningtias',
+                'G010': 'Muhammad Yusuf',
+                'G011': 'Emi Maryamah',
+                'G012': 'Nurul Miftakul Janah',
+                'G013': 'Daiyatun Nadhiroh',
+                'G014': 'Zulianah',
+                'G015': 'Nafiah Indahniyyah',
+                'G016': 'Lilik Vauziyah',
+                'G017': 'Abdul Ghoni',
+                'G018': 'Jossa Andika Dwi P'
+            };
+            return teacherMap[teacherId];
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'984b6b5157d440f1',t:'MTc1ODgxMjcyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
